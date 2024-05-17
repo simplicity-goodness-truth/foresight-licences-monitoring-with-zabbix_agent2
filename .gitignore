@@ -13,4 +13,5 @@ archive.zip
 .nwabaprc
 *ui5*.yaml
 .vscode
+.exe
 *.exe
