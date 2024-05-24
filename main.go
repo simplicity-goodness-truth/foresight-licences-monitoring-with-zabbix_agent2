@@ -13,11 +13,10 @@ import (
 
 	"bytes"
 
-	"time"
-
 	"git.zabbix.com/ap/plugin-support/plugin"
 	"git.zabbix.com/ap/plugin-support/plugin/container"
 )
+
 type Plugin struct {
 	plugin.Base
 }
@@ -28,9 +27,33 @@ var pluginConfig config.Config
 
 func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider) (result interface{}, err error) {
 
-	var activeUsersOfAnalyticsPlatform int
+	p.Infof("received request to handle %s key with %d parameters", key, len(params))
+
+	var activeUsersOfFeature int
+
+	var featureName string
 
 	var flf flf.ForesightLicenseFile
+
+	switch key {
+
+	case "analyticsplatformonlineuserscount":
+
+		featureName = "AnalyticsPlatform"
+
+	case "pp_admonlineuserscount":
+
+		featureName = "PP_Adm"
+
+	case "pp_dashboardvieweronlineuserscount":
+
+		featureName = "PP_DashboardViewer"
+
+	case "pp_reportvieweronlineuserscount":
+
+		featureName = "PP_ReportViewer"
+
+	}
 
 	// Static file mode
 
@@ -38,7 +61,7 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 
 		flf.NewForesightLicenseFile(pluginConfig.LocalFile)
 
-		activeUsersOfAnalyticsPlatform = flf.CountActiveUsersOfFeature("AnalyticsPlatform")
+		activeUsersOfFeature = flf.CountActiveUsersOfFeature(featureName)
 
 	}
 
@@ -51,50 +74,20 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 		buf := bytes.Buffer{}
 		cmd.Stdout = &buf
 		err := cmd.Run()
-	
-		//fmt.Println(buf.String(), err)
 
-		// cmd.Stdout = os.Stdout
-
-		// if err := cmd.Run(); err != nil {
-		// 	fmt.Println("could not run command: ", err)
-		//   }
-
-		//  cmdOutput, err := cmd.CombinedOutput()
+		cmdOutput, err := cmd.CombinedOutput()
 
 		if err != nil {
 			log.Printf("cmd.Run() for %s failed with %s\n", pluginConfig.CommandLine, err)
 		}
 
-		// time.Sleep(20 * time.Second)
+		flf.NewForesightLicenseFileByContent([]byte(cmdOutput))
 
-
-		//stderr, _ := cmd.StderrPipe()
-		//stderr, _ := cmd.StdoutPipe()
-		// cmd.Start()
-	
-		 time.Sleep(20 * time.Second)
-
-	//	 var cmdOutput string
-
-		// scanner := bufio.NewScanner(cmd.Stdout)
-		// scanner.Split(bufio.ScanWords)
-		// for scanner.Scan() {
-		// 	cmdOutput = scanner.Text()			
-		// }
-		// cmd.Wait()
-
-		//flf.NewForesightLicenseFileByContent([]byte(cmdOutput))
-
-		//activeUsersOfAnalyticsPlatform = flf.CountActiveUsersOfFeature("AnalyticsPlatform")
-
-		// ZZZZZZZZZZZZZZZZFORDEBUG PURPOSE
-		activeUsersOfAnalyticsPlatform = len(buf.String())
+		activeUsersOfFeature = flf.CountActiveUsersOfFeature(featureName)
 
 	}
 
-	return activeUsersOfAnalyticsPlatform, nil
-
+	return activeUsersOfFeature, nil
 
 }
 
@@ -103,6 +96,9 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 func init() {
 
 	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "analyticsplatformonlineuserscount", "Returns an amount of AnalyticsPLatform feature online users.")
+	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_admonlineuserscount", "Returns an amount of PP_Adm feature online users.")
+	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_dashboardvieweronlineuserscount", "Returns an amount of PP_DashboardViewer feature online users.")
+	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_reportvieweronlineuserscount", "Returns an amount of PP_ReportViewer feature online users.")
 
 }
 
