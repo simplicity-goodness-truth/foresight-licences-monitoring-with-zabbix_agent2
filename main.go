@@ -52,9 +52,9 @@ func main() {
 
 		fmt.Printf("Users of AnalyticsPlatform: %d \n", activeUsersOfAnalyticsPlatform)
 
-		activeUsersOfPP_WordAddin := flf.CountActiveUsersOfFeature("PP_WordAddin")
+		activeUsersOfPP_Adm := flf.CountActiveUsersOfFeature("PP_Adm")
 
-		fmt.Printf("Users of PP_WordAddin: %d \n", activeUsersOfPP_WordAddin)
+		fmt.Printf("Users of PP_Adm: %d \n", activeUsersOfPP_Adm)
 
 	}
 
