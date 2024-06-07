@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"foresightLicenseFileParserForZabbix/config"
 	"foresightLicenseFileParserForZabbix/flf"
-	"log"
 	"os/exec"
+	"time"
 
 	"flag"
-
 	"runtime"
-
-	"bytes"
 
 	"git.zabbix.com/ap/plugin-support/plugin"
 	"git.zabbix.com/ap/plugin-support/plugin/container"
 )
+
+type Data struct {
+	output []byte
+	error  error
+}
 
 type Plugin struct {
 	plugin.Base
@@ -69,26 +71,54 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 
 	if (pluginConfig.CommandMode) && (len(pluginConfig.CommandLine) > 0) {
 
-		cmd := exec.Command(pluginConfig.CommandLine)
+		// Getting delay setup
 
-		buf := bytes.Buffer{}
-		cmd.Stdout = &buf
-		err := cmd.Run()
+		waitTimeSeconds := pluginConfig.CommandResultWaitTimeSeconds
 
-		cmdOutput, err := cmd.CombinedOutput()
+		c := make(chan Data)
+			
+		// This will work in background
 
-		if err != nil {
-			log.Printf("cmd.Run() for %s failed with %s\n", pluginConfig.CommandLine, err)
+		go runOSCommand(c, pluginConfig.CommandLine, pluginConfig.CommandArguments, waitTimeSeconds)
+
+		// When everything is done, you can check your background process result
+		res := <-c
+
+		if res.error != nil {
+
+			fmt.Println("Failed to execute command: ", res.error)
+		
+		} else {
+
+			// You will be here, runOSCommand has finish successfuly
+			flf.NewForesightLicenseFileByContent([]byte(res.output))
+
+			activeUsersOfFeature = flf.CountActiveUsersOfFeature(featureName)
+
 		}
-
-		flf.NewForesightLicenseFileByContent([]byte(cmdOutput))
-
-		activeUsersOfFeature = flf.CountActiveUsersOfFeature(featureName)
 
 	}
 
 	return activeUsersOfFeature, nil
 
+}
+
+func runOSCommand(ch chan<- Data, command string, arguments string, waitTimeSeconds int) {
+
+	cmd := exec.Command(command, arguments)
+
+	data, err := cmd.CombinedOutput()
+
+	if waitTimeSeconds > 0 {
+
+		time.Sleep(time.Duration(waitTimeSeconds) * time.Second)
+
+	}
+
+	ch <- Data{
+		error:  err,
+		output: data,
+	}
 }
 
 // Mandatory functions

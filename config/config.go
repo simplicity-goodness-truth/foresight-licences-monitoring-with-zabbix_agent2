@@ -24,8 +24,10 @@ type Config struct {
 
 		CommandMode bool `yaml:"commandMode"`
 		CommandLine string `yaml:"commandLine"`
+		CommandArguments string `yaml:"commandArguments"`
+		CommandResultWaitTimeSeconds int `yaml:"commandResultWaitTimeSeconds"`
 		LocalFile   string `yaml:"localFile"`
-	
+
 }
 
 
