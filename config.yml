@@ -1,5 +1,0 @@
-# Put this file by default to C:\Program Files\Zabbix Agent 2\
-
-commandMode: false
-commandLine: 
-localFile: C:\TerraLink\delivery\internalProjects\zabbixForForesight\License.log

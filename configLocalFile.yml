@@ -1,0 +1,7 @@
+# rename this file to zabbixFLFconfig.yml 
+# default location for Linux: /usr/local/sbin/
+# default location for Windows: C:\Program Files\Zabbix Agent 2\
+
+commandMode: false
+commandLine: 
+localFile: C:\TerraLink\delivery\internalProjects\zabbixForForesight\License.log

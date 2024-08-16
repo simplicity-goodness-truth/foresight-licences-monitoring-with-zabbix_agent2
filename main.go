@@ -148,7 +148,11 @@ func main() {
 
 	if runtime.GOOS == "windows" {
 
-		defaultConfigFilePath = "C:\\Program Files\\Zabbix Agent 2\\config.yml"
+		defaultConfigFilePath = "C:\\Program Files\\Zabbix Agent 2\\zabbixFLFconfig.yml"
+
+	} else {
+
+		defaultConfigFilePath = "/usr/local/sbin/zabbixFLFconfig.yml"
 
 	}
 

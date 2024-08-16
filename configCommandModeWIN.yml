@@ -1,0 +1,8 @@
+# rename this file to zabbixFLFconfig.yml 
+# default location: C:\Program Files\Zabbix Agent 2
+
+commandMode: true
+commandLine: C:\Temp\lsmon\lsmon\lsmon.exe
+commandArguments: ms-tl-fap-dev1.ms.dev.local
+commandResultWaitTimeSeconds: 0
+localFile: C:\Temp\License.log

@@ -1,0 +1,7 @@
+# rename this file to zabbixFLFconfig.yml 
+# default location: /usr/local/sbin/
+
+commandMode: true
+commandLine: /opt/foresight/lsmon
+commandArguments: ms-tl-fap-dev1.ms.dev.local
+commandResultWaitTimeSeconds: 0
