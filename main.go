@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"foresightLicenseFileParserStandalone/config"
@@ -37,44 +38,42 @@ func main() {
 
 	appConfig.NewConfig(*configFilePath)
 
-	// appConfig.Print()
-
 	var flf flf.ForesightLicenseFile
 
 	// Static file mode
 
 	if (!appConfig.Get().CommandMode) && (len(appConfig.Get().LocalFile) > 0) {
 
-
 		flf.NewForesightLicenseFile(appConfig.Get().LocalFile)
 
-		activeUsersOfAnalyticsPlatform := flf.CountActiveUsersOfFeature("AnalyticsPlatform")
+		for i, _ := range appConfig.Get().OnlineUsersCounterConfig {			
 
-		fmt.Printf("Users of AnalyticsPlatform: %d \n", activeUsersOfAnalyticsPlatform)
-
-		activeUsersOfPP_Adm := flf.CountActiveUsersOfFeature("PP_Adm")
-
-		fmt.Printf("Users of PP_Adm: %d \n", activeUsersOfPP_Adm)
-
+			fmt.Printf("metric: %s value %d \n", appConfig.Get().OnlineUsersCounterConfig[i].MetricName,
+				flf.CountActiveUsersOfFeature(appConfig.Get().OnlineUsersCounterConfig[i].FeatureName) )
+	
+		}
 	}
 
 	// Command line mode
 
 	if (appConfig.Get().CommandMode) && (len(appConfig.Get().CommandLine) > 0) {
 
+		fmt.Printf("Executing command mode\n")
+
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+
 		cmd := exec.Command(appConfig.Get().CommandLine)
 
-		cmdOutput, err := cmd.CombinedOutput()
-		
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
+		err := cmd.Start()
 		if err != nil {
-			log.Printf("cmd.Run() for %s failed with %s\n", appConfig.Get().CommandLine, err)
+			log.Fatal(err)
 		}
 
-		flf.NewForesightLicenseFileByContent(cmdOutput)
-
-		activeUsersOfAnalyticsPlatform := flf.CountActiveUsersOfFeature("AnalyticsPlatform")
-
-		fmt.Printf("Users of AnalyticsPlatform: %d \n", activeUsersOfAnalyticsPlatform)
+		err = cmd.Wait()
 
 	}
 

@@ -20,14 +20,19 @@ type AppConfig struct {
 	config Config
 }
 
+type OnlineUsersCounterConfigItem struct {
+    MetricName string `yaml:"metricName"`
+    FeatureName string `yaml:"featureName"`
+}
+
 type Config struct {
 
 		CommandMode bool `yaml:"commandMode"`
 		CommandLine string `yaml:"commandLine"`
 		LocalFile   string `yaml:"localFile"`
+		OnlineUsersCounterConfig []OnlineUsersCounterConfigItem `yaml:"onlineUsersCounterConfig"`
 	
 }
-
 
 // Constructor
 
