@@ -37,25 +37,35 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 
 	var flf flf.ForesightLicenseFile
 
-	switch key {
+	for i, _ := range pluginConfig.OnlineUsersCounterConfig {
 
-	case "analyticsplatformonlineuserscount":
+		if key == pluginConfig.OnlineUsersCounterConfig[i].MetricName {
 
-		featureName = "AnalyticsPlatform"
+			featureName = pluginConfig.OnlineUsersCounterConfig[i].FeatureName
 
-	case "pp_admonlineuserscount":
-
-		featureName = "PP_Adm"
-
-	case "pp_dashboardvieweronlineuserscount":
-
-		featureName = "PP_DashboardViewer"
-
-	case "pp_reportvieweronlineuserscount":
-
-		featureName = "PP_ReportViewer"
+		}
 
 	}
+
+	// switch key {
+
+	// case "analyticsplatformonlineuserscount":
+
+	// 	featureName = "AnalyticsPlatform"
+
+	// case "pp_admonlineuserscount":
+
+	// 	featureName = "PP_Adm"
+
+	// case "pp_dashboardvieweronlineuserscount":
+
+	// 	featureName = "PP_DashboardViewer"
+
+	// case "pp_reportvieweronlineuserscount":
+
+	// 	featureName = "PP_ReportViewer"
+
+	// }
 
 	// Static file mode
 
@@ -76,7 +86,7 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 		waitTimeSeconds := pluginConfig.CommandResultWaitTimeSeconds
 
 		c := make(chan Data)
-			
+
 		// This will work in background
 
 		go runOSCommand(c, pluginConfig.CommandLine, pluginConfig.CommandArguments, waitTimeSeconds)
@@ -87,7 +97,7 @@ func (p *Plugin) Export(key string, params []string, ctx plugin.ContextProvider)
 		if res.error != nil {
 
 			fmt.Println("Failed to execute command: ", res.error)
-		
+
 		} else {
 
 			// You will be here, runOSCommand has finish successfuly
@@ -125,20 +135,38 @@ func runOSCommand(ch chan<- Data, command string, arguments string, waitTimeSeco
 
 func init() {
 
-	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "analyticsplatformonlineuserscount", "Returns an amount of AnalyticsPLatform feature online users.")
-	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_admonlineuserscount", "Returns an amount of PP_Adm feature online users.")
-	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_dashboardvieweronlineuserscount", "Returns an amount of PP_DashboardViewer feature online users.")
-	plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_reportvieweronlineuserscount", "Returns an amount of PP_ReportViewer feature online users.")
+	loadConfig()
 
+	for i, _ := range pluginConfig.OnlineUsersCounterConfig {		
+		metricDescription := "Returns an amount of " + pluginConfig.OnlineUsersCounterConfig[i].MetricName + " feature online users."
+		plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", pluginConfig.OnlineUsersCounterConfig[i].MetricName, metricDescription)
+
+	}
+
+	// plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_admonlineuserscount", "Returns an amount of PP_Adm feature online users.")
+	// plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_dashboardvieweronlineuserscount", "Returns an amount of PP_DashboardView
+	// plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "analyticsplatformonlineuserscount", "Returns an amount of AnalyticsPLatform feature online users.")er feature online users.")
+	// plugin.RegisterMetrics(&impl, "ForesightLicenseFileParser", "pp_reportvieweronlineuserscount", "Returns an amount of PP_ReportViewer feature online users.")
 }
 
 func main() {
 
-	// Getting current directory as a configuration file default location
-	// currentDirectory, err := os.Getwd()
-	// if err != nil {
-	//     fmt.Println(err)
-	// }
+	// Creating handler
+
+	h, err := container.NewHandler(impl.Name())
+
+	if err != nil {
+		panic(fmt.Sprintf("failed to create plugin handler %s", err.Error()))
+	}
+	impl.Logger = &h
+	err = h.Execute()
+	if err != nil {
+		panic(fmt.Sprintf("failed to execute plugin handler %s", err.Error()))
+	}
+
+}
+
+func loadConfig() {
 
 	// When running in Zabbix Agent 2 mode there is no change to execute a plugin with command line parameters
 	// In addition it is not clear which is a current directory for Zabbix Agent 2
@@ -158,7 +186,6 @@ func main() {
 
 	// Getting flags
 	configFilePath := flag.String("configfile", defaultConfigFilePath, "Full path to configuration file")
-	//configFilePath := flag.String("configfile", currentDirectory + "\\config.yml", "Full path to configuration file")
 
 	flag.Parse()
 
@@ -169,18 +196,5 @@ func main() {
 	appConfig.NewConfig(*configFilePath)
 
 	pluginConfig = appConfig.Get()
-
-	// Creating handler
-
-	h, err := container.NewHandler(impl.Name())
-
-	if err != nil {
-		panic(fmt.Sprintf("failed to create plugin handler %s", err.Error()))
-	}
-	impl.Logger = &h
-	err = h.Execute()
-	if err != nil {
-		panic(fmt.Sprintf("failed to execute plugin handler %s", err.Error()))
-	}
 
 }

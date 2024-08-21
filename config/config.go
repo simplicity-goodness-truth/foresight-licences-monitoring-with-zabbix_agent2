@@ -20,6 +20,11 @@ type AppConfig struct {
 	config Config
 }
 
+type OnlineUsersCounterConfigItem struct {
+    MetricName string `yaml:"metricName"`
+    FeatureName string `yaml:"featureName"`
+}
+
 type Config struct {
 
 		CommandMode bool `yaml:"commandMode"`
@@ -27,6 +32,7 @@ type Config struct {
 		CommandArguments string `yaml:"commandArguments"`
 		CommandResultWaitTimeSeconds int `yaml:"commandResultWaitTimeSeconds"`
 		LocalFile   string `yaml:"localFile"`
+		OnlineUsersCounterConfig []OnlineUsersCounterConfigItem `yaml:"onlineUsersCounterConfig"`
 
 }
 

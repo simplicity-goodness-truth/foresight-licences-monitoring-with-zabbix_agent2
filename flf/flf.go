@@ -98,17 +98,29 @@ func (f *ForesightLicenseFile) PrintFeatureUsersOnline() {
 
 func (f *ForesightLicenseFile) countOnlineUsersByFeatureName(featureName string) int {
 
-	var activeUsersOfFeature int
+	var totalActiveUsersOfFeature int
+	var activeUsersOfFeatureItem int
 
-	for _, item := range f.GetFeatureUsersOnline() {
+	// Information on licenses can be spread over a file, so we have to consider calculation for a following scenario and calculate totals:
+	// 	Feature A ...
+	// 	Feature B ...
+	// 	Feature C ...
+	// 	Feature A ...
+	//	Feature A ...
+	// 	Feature X ...
 
-		if item.name == featureName {
+	for _, featureItem := range f.GetFeatureUsersOnline() {
 
-			activeUsersOfFeature = len(item.users)
+		if featureItem.name == featureName {			
+
+			activeUsersOfFeatureItem = len(featureItem.users)
+
+			totalActiveUsersOfFeature = totalActiveUsersOfFeature + activeUsersOfFeatureItem
+
 		}
 	}
 
-	return activeUsersOfFeature
+	return totalActiveUsersOfFeature
 }
 
 func (f *ForesightLicenseFile) setFile(file file.File) {

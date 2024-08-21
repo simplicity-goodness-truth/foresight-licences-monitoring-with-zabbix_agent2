@@ -5,3 +5,18 @@ commandMode: true
 commandLine: /opt/foresight/lsmon
 commandArguments: ms-tl-fap-dev1.ms.dev.local
 commandResultWaitTimeSeconds: 0
+onlineUsersCounterConfig:
+  - metricName: analyticsplatformonlineuserscount
+    featureName: AnalyticsPlatform
+  - metricName: pp_admonlineuserscount
+    featureName: PP_Adm
+  - metricName: pp_dashboardvieweronlineuserscount
+    featureName: PP_DashboardViewer
+  - metricName: pp_reportvieweronlineuserscount
+    featureName: PP_ReportViewer
+  - metricName: pp_dwdesigneronlineuserscount
+    featureName: PP_DWDesigner
+  - metricName: pp_dashboardeditoronlineuserscount
+    featureName: PP_DashboardEditor
+  - metricName: pp_scheduleronlineuserscount
+    featureName: PP_Scheduler
